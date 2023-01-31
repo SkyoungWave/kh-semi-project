@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="selectBaList">
+
+SELECT *
+FROM(SELECT ROWNUM RNUM,A.*
+    FROM(SELECT BOOK_APPLY_NO
+		  ,USER_ID
+		  ,BOOK_APPLY_TITLE
+		  ,BOOK_APPLY_CONTENT
+		  ,CREATE_DATE
+		  ,COUNT
+        FROM BOOK_APPLY
+        JOIN MEMBER ON(BOOK_APPLY_WRITER=USER_NO)
+        ORDER BY BOOK_APPLY_NO DESC)A)
+WHERE RNUM BETWEEN ? AND ?
+
+</entry>
+<entry key="selectCount">
+	SELECT COUNT(*) COUNT
+	FROM BOOK_APPLY
+</entry>
+
+<entry key="increaseCount">
+	UPDATE BOOK_APPLY
+	SET COUNT=COUNT+1
+	WHERE BOOK_APPLY_NO=?
+
+</entry>
+<entry key="selectBookApply">
+	SELECT BOOK_APPLY_NO 
+		  ,USER_ID
+		  ,BOOK_APPLY_TITLE
+		  ,BOOK_APPLY_CONTENT
+		  ,CREATE_DATE
+	FROM BOOK_APPLY
+	JOIN MEMBER ON(USER_NO=BOOK_APPLY_WRITER)
+	WHERE BOOK_APPLY_NO=?
+</entry>
+<entry key="selectList">
+	SELECT COUNT(*) COUNT
+	FROM BOOK_APPLY
+</entry>
+
+<entry key="insertBa">
+	INSERT INTO BOOK_APPLY(BOOK_APPLY_NO
+						  ,BOOK_APPLY_TITLE
+						  ,BOOK_APPLY_CONTENT
+						  ,CREATE_DATE)
+					VALUES(SEQ_BOOK_APPLY.NEXTVAL
+						  ,?
+						  ,?
+						  ,DEFAULT)
+</entry>
+</properties>
+
+
+ 

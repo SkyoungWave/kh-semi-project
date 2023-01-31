@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	
+	<entry key="selectBookList">
+		SELECT 
+			ROWNUM RNUM,
+			BOOK_NO,
+			GENRE_NAME,
+			BOOK_TITLE,
+			AUTHOR,
+			BOOK_INFO,
+			RENT_COUNT,
+			CREATE_BOOK,
+			B.STATUS,
+			BC.FILE_PATH,
+			BC.ORIGIN_NAME,
+			BC.CHANGE_NAME
+		FROM BOOK B
+		JOIN BOOKCOVER BC USING(BOOK_NO)
+		JOIN GENRE G USING(GENRE_NO)
+		WHERE BOOK_TITLE LIKE ? AND B.STATUS='Y'
+		ORDER BY BOOK_NO DESC
+	</entry>
+	<entry key="selectBook">
+		SELECT 
+			BOOK_NO,
+			GENRE_NAME,
+			BOOK_TITLE,
+			AUTHOR,
+			BOOK_INFO,
+			RENT_COUNT,
+			CREATE_BOOK,
+			B.STATUS,
+		   	BC.FILE_PATH,
+		    BC.ORIGIN_NAME,
+		    BC.CHANGE_NAME
+		FROM BOOK B
+		JOIN BOOKCOVER BC USING(BOOK_NO)
+		JOIN GENRE G USING(GENRE_NO)
+		WHERE BOOK_NO = ?
+	</entry>
+	
+	
+	<entry key="selectCategoryList">
+	SELECT GENRE_NO, GENRE_NAME
+	FROM GENRE
+	</entry>
+	
+	
+	<entry key="insertBoard">
+		INSERT INTO BOOK
+		VALUES(SEQ_BOOK.NEXTVAL, ?, ?, ?, ?, 0, ?, 'Y')
+	</entry>
+	
+	<entry key = "insertCover">
+		INSERT INTO BOOKCOVER
+		VALUES(SEQ_COVER.NEXTVAL,SEQ_BOOK.CURRVAL,?,?,?,SYSDATE, 'Y')
+	</entry>
+	
+	<entry key = "deleteBook">
+		UPDATE BOOK
+		SET STATUS='N'
+		WHERE BOOK_NO=?
+	</entry>
+	
+	<entry key ="selectCover">
+		SELECT FILE_NO,
+		    BOOK_NO,
+		    ORIGIN_NAME,
+		    CHANGE_NAME,
+		    FILE_PATH,
+		    ENROLL_DATE,
+		    STATUS
+		FROM BOOKCOVER
+		WHERE BOOK_NO=?
+	</entry>
+	
+	<entry key ="updateBook">
+		UPDATE BOOK
+		SET BOOK_TITLE = ?,
+			GENRE_NO = ?,
+			AUTHOR = ?,
+			CREATE_BOOK = ?,
+			BOOK_INFO = ?
+		WHERE BOOK_NO = ?
+	</entry>
+	
+	<entry key = "updateCover">
+		UPDATE BOOKCOVER
+		SET ORIGIN_NAME = ?,
+			CHANGE_NAME = ?,
+			FILE_PATH = ?
+		WHERE FILE_NO = ?
+	</entry>
+
+	
+</properties>

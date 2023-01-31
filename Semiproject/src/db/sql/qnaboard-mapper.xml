@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<entry key="selectQnaTextListCount">
+		SELECT COUNT(*) COUNT
+		FROM QNABOARD
+		WHERE STATUS = 'Y'
+		AND QNABOARD_TITLE LIKE ?
+	</entry>
+	
+	<entry key="selectQnaListCount">
+		SELECT COUNT(*) COUNT
+		FROM QNABOARD
+		WHERE STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectQnaTextList">
+            SELECT *
+		FROM (
+			  SELECT ROWNUM RNUM,A.*      
+        	  FROM	(
+       	  			SELECT QNABOARD_NO,
+       	  				   QNACATEGORY_NAME,
+		                   QNABOARD_TITLE,
+		                   USER_ID,
+		                   COUNT,
+		                   CREATE_DATE
+		            FROM QNABOARD Q 
+		            LEFT JOIN QNACATEGORY USING(QNACATEGORY_NO)       
+		            JOIN MEMBER ON (Q.QNABOARD_WRITER=USER_NO)
+		            WHERE Q.STATUS ='Y'
+                    AND Q.QNABOARD_TITLE LIKE ?
+		            ORDER BY CREATE_DATE DESC) A   
+		           )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	<entry key="selectQnaList">
+        SELECT *
+		FROM (
+			  SELECT ROWNUM RNUM,A.*      
+        	  FROM	(
+       	  			SELECT QNABOARD_NO,
+		                   QNACATEGORY_NAME,
+		                   QNABOARD_TITLE,
+		                   USER_ID,
+		                   COUNT,
+		                   CREATE_DATE
+		            FROM QNABOARD Q 
+		            JOIN QNACATEGORY USING(QNACATEGORY_NO)       
+		            JOIN MEMBER ON (QNABOARD_WRITER=USER_NO)
+		            WHERE Q.STATUS ='Y'
+		            ORDER BY CREATE_DATE DESC) A   
+		           )
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="QnaIncreaseCount">
+		UPDATE QNABOARD
+		SET COUNT = COUNT + 1 
+		WHERE QNABOARD_NO = ?
+		AND STATUS = 'Y' 
+	</entry>
+	
+		<entry key="selectQnaBoard">
+		SELECT QNABOARD_NO
+			  ,QNACATEGORY_NAME
+			  ,QNABOARD_TITLE
+			  ,USER_ID
+			  ,CREATE_DATE
+			  ,QNABOARD_CONTENT
+		FROM QNABOARD Q
+		LEFT JOIN QNACATEGORY USING (QNACATEGORY_NO)
+		JOIN MEMBER ON (USER_NO=QNABOARD_WRITER) 
+		WHERE QNABOARD_NO = ?
+		AND Q.STATUS = 'Y'  
+	</entry>
+	
+		
+	<entry key="selectQnaAttachment">
+		SELECT QFILE_NO
+			  ,QORIGIN_NAME
+			  ,QCHANGE_NAME
+			  ,QFILE_PATH
+		FROM QNAATTACHMENT
+		WHERE REF_QNO = ?
+		AND STATUS = 'Y'
+	</entry>
+		<entry key="insertQnaBoard">
+		INSERT INTO QNABOARD(QNABOARD_NO
+						 ,QNACATEGORY_NO 
+						 ,QNABOARD_TITLE
+						 ,QNABOARD_CONTENT
+						 ,QNABOARD_WRITER)
+		VALUES(SEQ_QBNO.NEXTVAL,?,?,?,?)		 
+	</entry>
+	
+	<!--게시글 등록이 된 후에 첨부파일 정보가 등록되어야 하기 때문에
+		해당 게시글이 등록되면서 발생한 현재 시퀀스 번호를 참조번호로 사용한다   -->
+	<entry key="insertQnaAttachment">
+   		INSERT INTO QNAATTACHMENT(QFILE_NO
+						  ,REF_QNO
+						  ,QORIGIN_NAME
+						  ,QCHANGE_NAME
+						  ,QFILE_PATH)
+		VALUES (SEQ_QFNO.NEXTVAL,SEQ_QBNO.CURRVAL,?,?,?)
+	</entry>
+	<entry key="selectQnaCategoryList">
+		SELECT QNACATEGORY_NO,
+		       QNACATEGORY_NAME
+		FROM QNACATEGORY
+	</entry>
+	<entry key="deleteQnaBoard">
+		UPDATE QNABOARD
+		SET STATUS = 'N'
+		WHERE QNABOARD_NO = ?	
+	</entry>
+	<entry key="updateQnaBoard">
+		UPDATE QNABOARD
+		SET QNACATEGORY_NO = ?
+			,QNABOARD_TITLE = ?
+			,QNABOARD_CONTENT = ? 
+		WHERE QNABOARD_NO = ?
+		AND STATUS = 'Y'
+	</entry>
+	<entry key="updateQnaAttachment">
+		UPDATE QNAATTACHMENT
+		SET  QORIGIN_NAME = ?
+			,QCHANGE_NAME = ?
+			,QFILE_PATH = ? 
+			,QUPLOAD_DATE = SYSDATE
+		WHERE QFILE_NO = ? 
+	</entry>
+	<entry key="insertQnaNewAttachment">
+		INSERT INTO QNAATTACHMENT(FILE_NO
+						  ,REF_QBNO
+						  ,QORIGIN_NAME
+						  ,QCHANGE_NAME
+						  ,QFILE_PATH)
+		VALUES (SEQ_QFNO.NEXTVAL,REF_QNO.CURRVAL,?,?,?)
+	</entry>
+	
+	<entry key="insertReply">	
+		INSERT INTO QNAREPLY(QREPLY_NO,
+							QREPLY_CONTENT,
+							REF_QBNO,
+							REF_GROUP,
+							RE_STEP,
+							RE_LEVEL,
+							QREPLY_WRITER
+						)
+					VALUES (SEQ_QRNO.NEXTVAL,?,?
+						  ,(SELECT NVL(MAX(REF_GROUP),0)+1 FROM QNAREPLY)
+						  ,0
+						  ,0
+						  ,?)
+	</entry>
+	<entry key="reList">
+	SELECT QREPLY_NO,
+		   RE_LEVEL,
+	       QREPLY_CONTENT,
+	       USER_ID,
+	       CREATE_DATE
+	FROM QNAREPLY Q 
+	JOIN MEMBER ON (USER_NO=QREPLY_WRITER)
+	WHERE Q.STATUS = 'Y'
+	AND Q.REF_QBNO = ?
+	ORDER BY CREATE_DATE ASC
+	</entry>
+	
+	<entry key="selectReplyList">
+	SELECT QREPLY_NO,
+	       QREPLY_CONTENT,
+	       USER_ID,
+	       CREATE_DATE,
+		   RE_STEP,
+		   RE_LEVEL
+	FROM QNAREPLY Q 
+	JOIN MEMBER ON (USER_NO=QREPLY_WRITER)
+	WHERE Q.STATUS = 'Y'
+	AND Q.REF_QBNO = ?
+	CONNECT BY NOCYCLE PRIOR REF_GROUP = QREPLY_NO
+	ORDER BY REF_GROUP, RE_STEP
+	</entry>	
+	
+	<entry key="deleteReply">
+	<![CDATA[
+		UPDATE QNAREPLY      
+		SET STATUS = 'N'
+		WHERE REF_GROUP = ?
+        AND RE_STEP >= ?
+        AND RE_LEVEL >= ?
+        AND RE_STEP <= NVL((SELECT MIN(RE_STEP) 
+                            FROM QNAREPLY
+                            WHERE REF_GROUP = ?
+                            AND RE_STEP > ?
+                            AND RE_LEVEL <= ?),(SELECT MAX(RE_STEP)
+                                                FROM QNAREPLY
+                                                WHERE REF_GROUP = ?))
+                                                ]]>                                             
+	</entry>
+	<entry key="pullLevel">	
+		UPDATE QNAREPLY
+		SET RE_STEP = RE_STEP-? 
+		WHERE SELECT RE_LEVEL FROM QNAREPLY WHERE QREPLY_NO = ?
+		AND STATUS = 'Y'	
+	</entry>	
+	
+	
+	<entry key="selectDeleteReply">	
+	SELECT REF_GROUP
+          ,RE_STEP
+          ,RE_LEVEL
+    FROM QNAREPLY
+    WHERE QREPLY_NO = ?
+	</entry>
+
+	
+	<entry key="selectReplyUpdate">
+		SELECT QREPLY_NO,
+		       QREPLY_CONTENT,
+		       USER_ID,
+		       CREATE_DATE,
+		       REF_GROUP,
+		       RE_STEP,
+		       RE_LEVEL
+		FROM QNAREPLY Q 
+		JOIN MEMBER ON (USER_NO=QREPLY_WRITER)
+		WHERE Q.STATUS = 'Y'
+		AND Q.QREPLY_NO = ?	
+		ORDER BY CREATE_DATE DESC
+	</entry>
+	<entry key="updateReply">	
+		UPDATE QNAREPLY
+		SET QREPLY_CONTENT = ? 
+		WHERE QREPLY_NO = ?
+		AND STATUS = 'Y'	
+	</entry>
+	<entry key="pushLevel">	
+		UPDATE QNAREPLY
+		SET RE_STEP = RE_STEP+1
+		WHERE REF_GROUP = (SELECT REF_GROUP FROM QNAREPLY WHERE QREPLY_NO = ?)
+		AND RE_STEP > (SELECT RE_STEP FROM QNAREPLY WHERE QREPLY_NO = ?)
+		AND (SELECT RE_LEVEL FROM QNAREPLY WHERE QREPLY_NO = ?)!= 0
+		AND STATUS = 'Y'	
+	</entry>
+	
+	
+	
+	<entry key="insertReplyReply">	
+		INSERT INTO  QNAREPLY(QREPLY_NO,
+		                      QREPLY_CONTENT,
+							  REF_QBNO,
+						      QREPLY_WRITER,
+		                      REF_GROUP,
+		                      RE_STEP,
+		                      RE_LEVEL
+						)
+					VALUES (SEQ_QRNO.NEXTVAL
+						  ,?
+						  ,?
+						  ,?
+						  ,?
+						  ,1+(SELECT MAX(RE_STEP) FROM QNAREPLY WHERE REF_GROUP = ?)
+						  ,1+?
+						  )
+	</entry>
+	<entry key="insertReplyReply2">	
+		INSERT INTO  QNAREPLY(QREPLY_NO,
+		                      QREPLY_CONTENT,
+							  REF_QBNO,
+						      QREPLY_WRITER,
+		                      REF_GROUP,
+		                      RE_STEP,
+		                      RE_LEVEL
+						)
+					VALUES (SEQ_QRNO.NEXTVAL
+						  ,?
+						  ,?
+						  ,?
+						  ,?
+						  ,1+?
+						  ,1+?
+						  )
+	</entry>
+	<entry key="selectInsertReplyReply">	
+		SELECT REF_GROUP
+	          ,RE_STEP
+	          ,RE_LEVEL
+	    FROM QNAREPLY
+	    WHERE QREPLY_NO = ?
+	</entry>	
+	
+</properties>
